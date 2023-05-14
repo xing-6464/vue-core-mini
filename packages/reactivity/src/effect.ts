@@ -1,3 +1,7 @@
+type KeyToDepMap = Map<any, ReactiveEffect>
+
+const targetMap = new WeakMap<any, KeyToDepMap>()
+
 export function effect<T = any>(fn: () => T) {
   const _effect = new ReactiveEffect(fn)
 
@@ -22,7 +26,14 @@ export class ReactiveEffect<T = any> {
  * @param key
  */
 export function track(target: object, key: unknown) {
-  console.log('依赖收集')
+  if (!activeEffect) return
+
+  let depsMap = targetMap.get(target)
+  if (!depsMap) {
+    targetMap.set(target, (depsMap = new Map()))
+  }
+
+  depsMap.set(key, activeEffect)
 }
 
 /**
