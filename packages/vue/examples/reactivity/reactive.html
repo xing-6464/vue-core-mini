@@ -8,16 +8,18 @@
     <script src="../../dist/vue.js"></script>
   </head>
   <body>
+    <div id="app"></div>
+
     <script>
-      const { reactive } = Vue
+      const { reactive, effect } = Vue
 
       const obj = reactive({
         name: 'xing'
       })
 
-      console.info(reactive)
-      console.info(obj.name)
-      obj.name = 'guang'
+      effect(() => {
+        document.querySelector('#app').innerText = obj.name
+      })
     </script>
   </body>
 </html>
