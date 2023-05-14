@@ -1,4 +1,7 @@
-type KeyToDepMap = Map<any, ReactiveEffect>
+import { isArray } from "@vue/shared"
+import { createDep, type Dep } from "./dep"
+
+type KeyToDepMap = Map<any, Dep>
 
 const targetMap = new WeakMap<any, KeyToDepMap>()
 
@@ -33,7 +36,19 @@ export function track(target: object, key: unknown) {
     targetMap.set(target, (depsMap = new Map()))
   }
 
-  depsMap.set(key, activeEffect)
+  let dep = depsMap.get(key)
+  if (!dep) {
+    depsMap.set(key, (dep = createDep()))
+  }
+
+  trackEffects(dep)
+}
+
+/**
+ * 利用 dep 依次跟踪指定的 key 的所有 effect
+ */
+export function trackEffects(dep: Dep) {
+  dep.add(activeEffect!)
 }
 
 /**
@@ -46,8 +61,30 @@ export function trigger(target: object, key: unknown, newValue: unknown) {
   const depsMap = targetMap.get(target)
   if (!depsMap) return
 
-  const effect = depsMap.get(key) as ReactiveEffect
-  if (!effect) return
+  const dep: Dep | undefined = depsMap.get(key)
+  if (!dep) return
 
+  triggerEffects(dep)
+}
+
+/**
+ * 依次触发dep中保存的依赖
+ * @param dep 
+ */
+export function triggerEffects(dep: Dep) {
+  const effects = isArray(dep) ? dep : [...dep]
+
+  // 依次触发依赖
+  for (const effect of effects) {
+    triggerEffect(effect)
+  }
+
+}
+
+/**
+ * 触发指定依赖 
+ * @param effect 
+ */
+export function triggerEffect(effect: ReactiveEffect) {
   effect.run()
 }

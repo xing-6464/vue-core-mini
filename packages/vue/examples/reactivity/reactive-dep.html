@@ -8,10 +8,7 @@
     <script src="../../dist/vue.js"></script>
   </head>
   <body>
-    <div id="app">
-      <p id="p1"></p>
-      <p id="p2"></p>
-    </div>
+    <div id="app"></div>
 
     <script>
       const { reactive, effect } = Vue
@@ -21,11 +18,9 @@
       })
 
       effect(() => {
-        document.querySelector('#p1').innerText = obj.name
+        document.querySelector('#app').innerText = obj.name
       })
-      effect(() => {
-        document.querySelector('#p2').innerText = obj.name
-      })
+
       setTimeout(() => {
         obj.name = 'xingaasds'
       }, 2000)
