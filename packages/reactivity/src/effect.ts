@@ -1,6 +1,6 @@
-import { isArray } from "@vue/shared"
-import { createDep, type Dep } from "./dep"
-import type { ComputedRefImpl } from "./computed"
+import { isArray } from '@vue/shared'
+import { createDep, type Dep } from './dep'
+import type { ComputedRefImpl } from './computed'
 
 export type EffectScheduler = (...args: any[]) => any
 
@@ -74,7 +74,7 @@ export function trigger(target: object, key: unknown, newValue: unknown) {
 
 /**
  * 依次触发dep中保存的依赖
- * @param dep 
+ * @param dep
  */
 export function triggerEffects(dep: Dep) {
   const effects = isArray(dep) ? dep : [...dep]
@@ -91,15 +91,13 @@ export function triggerEffects(dep: Dep) {
       triggerEffect(effect)
     }
   }
-
 }
 
 /**
- * 触发指定依赖 
- * @param effect 
+ * 触发指定依赖
+ * @param effect
  */
 export function triggerEffect(effect: ReactiveEffect) {
-
   if (effect.scheduler) {
     effect.scheduler()
   } else {
