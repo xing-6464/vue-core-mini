@@ -1,6 +1,6 @@
 export const isArray = Array.isArray
 
-export const isObject = (val: unknown) =>
+export const isObject = (val: unknown): val is Object =>
   val !== null && typeof val === 'object'
 
 /**
