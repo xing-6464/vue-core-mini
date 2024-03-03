@@ -1,17 +1,27 @@
-import { isArray } from '@vue/shared'
+import { extend, isArray } from '@vue/shared'
 import { createDep, type Dep } from './dep'
 import type { ComputedRefImpl } from './computed'
 
 export type EffectScheduler = (...args: any[]) => any
+export interface ReactiveEffectOptions {
+  lazy?: boolean
+  scheduler?: EffectScheduler
+}
 
 type KeyToDepMap = Map<any, Dep>
 
 const targetMap = new WeakMap<any, KeyToDepMap>()
 
-export function effect<T = any>(fn: () => T) {
+export function effect<T = any>(fn: () => T, options?: ReactiveEffectOptions) {
   const _effect = new ReactiveEffect(fn)
 
-  _effect.run()
+  if (options) {
+    extend(_effect, options)
+  }
+
+  if (!options || !options.lazy) {
+    _effect.run()
+  }
 }
 
 export let activeEffect: ReactiveEffect | undefined
@@ -19,7 +29,10 @@ export let activeEffect: ReactiveEffect | undefined
 export class ReactiveEffect<T = any> {
   computed?: ComputedRefImpl<T>
 
-  constructor(public fn: () => T, public scheduler?: EffectScheduler | null) {}
+  constructor(
+    public fn: () => T,
+    public scheduler?: EffectScheduler | null
+  ) {}
 
   run() {
     activeEffect = this
