@@ -16,9 +16,16 @@
         name: 'xing'
       })
 
-      watch(obj, (val, oldVal) => {
-        console.log('watch')
-      })
+      watch(
+        obj,
+        (val, oldVal) => {
+          console.log('watch')
+          console.log('value', val)
+        },
+        {
+          immediate: true
+        }
+      )
 
       setTimeout(() => {
         obj.name = 'xinggouang'
