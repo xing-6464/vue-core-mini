@@ -32,6 +32,6 @@ export const toReactive = <T extends unknown>(value: T): T => {
   return isObject(value) ? reactive(value as object) : value
 }
 
-export const isReactive = (value: unknown) => {
+export const isReactive = (value: any) => {
   return !!(value && value[ReactiveFlags.IS_REACTIVE])
 }
