@@ -1,5 +1,6 @@
 import { ShapeFlags } from 'packages/shared/src/shapeFlags'
 import { Fragment, Text, Comment } from './vnode'
+import { EMPTY_OBJ } from '@vue/shared'
 
 export interface RendererOptions {
   /**
@@ -29,14 +30,16 @@ function baseCreateRenderer(options: RendererOptions): any {
     insert: hostInsert,
     patchProp: hostPatchProp,
     createElement: hostCreateElement,
-    setElementText: hostElementText
+    setElementText: hostSetElementText
   } = options
 
   const processElement = (oldVNode, newVNode, container, anchor) => {
     if (oldVNode == null) {
+      // 挂
       mountElement(newVNode, container, anchor)
     } else {
-      // TODO
+      // 更新
+      patchElement(oldVNode, newVNode)
     }
   }
 
@@ -45,7 +48,7 @@ function baseCreateRenderer(options: RendererOptions): any {
     const el = (VNode.el = hostCreateElement(type))
 
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
-      hostElementText(el, VNode.children)
+      hostSetElementText(el, VNode.children)
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     }
 
@@ -56,6 +59,73 @@ function baseCreateRenderer(options: RendererOptions): any {
     }
 
     hostInsert(el, container, anchor)
+  }
+
+  const patchElement = (oldVNode, newVNode) => {
+    const el = (newVNode.el = oldVNode.el)
+
+    const oldProps = oldVNode.props || EMPTY_OBJ
+    const newProps = newVNode.props || EMPTY_OBJ
+
+    patchChildren(oldVNode, newVNode, el, null)
+
+    patchProps(el, newVNode, oldProps, newProps)
+  }
+
+  const patchChildren = (oldVNode, newVNode, container, anchor) => {
+    const c1 = oldVNode?.children
+    const prevShapeFlag = oldVNode ? oldVNode.shapeFlag : 0
+    const c2 = newVNode?.children
+    const { shapeFlag } = newVNode
+
+    // 节点操作
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        // 更新
+      }
+
+      if (c2 !== c1) {
+        // 挂新子节点文本
+        hostSetElementText(container, c2)
+      }
+    } else {
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+          // TODO: diff
+        } else {
+          // TODO: 卸载
+        }
+      } else {
+        if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+          // 删除旧节点 text
+          hostSetElementText(container, '')
+        }
+        if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+          // TODO: 单独 子节点的挂载
+        }
+      }
+    }
+  }
+
+  const patchProps = (el: Element, VNode, oldProps, newPops) => {
+    if (oldProps !== newPops) {
+      for (const key in newPops) {
+        const next = newPops[key]
+        const prev = oldProps[key]
+
+        if (next !== prev) {
+          hostPatchProp(el, key, prev, next)
+        }
+      }
+
+      if (oldProps !== EMPTY_OBJ) {
+        for (const key in oldProps) {
+          if (!(key in newPops)) {
+            hostPatchProp(el, key, oldProps[key], null)
+          }
+        }
+      }
+    }
   }
 
   const patch = (oldVNode, newVNode, container, anchor = null) => {
