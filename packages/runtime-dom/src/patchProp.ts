@@ -8,7 +8,7 @@ export const patchProp = (
   nextValue: any
 ) => {
   if (key === 'class') {
-    patchClass(el, key)
+    patchClass(el, nextValue)
   } else if (key === 'style') {
   } else if (isOn(key)) {
   } else {
