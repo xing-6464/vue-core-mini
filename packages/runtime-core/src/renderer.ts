@@ -1,5 +1,5 @@
 import { ShapeFlags } from 'packages/shared/src/shapeFlags'
-import { Fragment, Text, Comment } from './vnode'
+import { Fragment, Text, Comment, isSomeVNodeType } from './vnode'
 import { EMPTY_OBJ } from '@vue/shared'
 
 export interface RendererOptions {
@@ -19,6 +19,7 @@ export interface RendererOptions {
    * 创建 element
    */
   createElement(type: string)
+  remove(el: Element)
 }
 
 export function createRenderer(options: RendererOptions) {
@@ -30,7 +31,8 @@ function baseCreateRenderer(options: RendererOptions): any {
     insert: hostInsert,
     patchProp: hostPatchProp,
     createElement: hostCreateElement,
-    setElementText: hostSetElementText
+    setElementText: hostSetElementText,
+    remove: hostRemove
   } = options
 
   const processElement = (oldVNode, newVNode, container, anchor) => {
@@ -131,6 +133,11 @@ function baseCreateRenderer(options: RendererOptions): any {
   const patch = (oldVNode, newVNode, container, anchor = null) => {
     if (oldVNode === newVNode) return
 
+    if (oldVNode && !isSomeVNodeType(oldVNode, newVNode)) {
+      unmount(oldVNode)
+      oldVNode = null
+    }
+
     const { type, shapeFlag } = newVNode
 
     switch (type) {
@@ -146,6 +153,10 @@ function baseCreateRenderer(options: RendererOptions): any {
         } else if (shapeFlag & ShapeFlags.COMPONENT) {
         }
     }
+  }
+
+  const unmount = VNode => {
+    hostRemove(VNode.el)
   }
 
   const render = (VNode, container) => {
