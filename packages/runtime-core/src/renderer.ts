@@ -161,7 +161,9 @@ function baseCreateRenderer(options: RendererOptions): any {
 
   const render = (VNode, container) => {
     if (VNode === null) {
-      // TODO
+      if (container._VNode) {
+        unmount(container._VNode)
+      }
     } else {
       patch(container._VNode || null, VNode, container)
     }
