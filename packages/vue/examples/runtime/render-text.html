@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script>
+      const { h, render, Text } = Vue
+
+      const div = h(Text, 'hello world')
+      render(div, document.getElementById('app'))
+
+      setTimeout(() => {
+        const vnode2 = h(Text, 'hello world2')
+        render(vnode2, document.getElementById('app'))
+      }, 2000)
+    </script>
+  </body>
+</html>
