@@ -45,24 +45,29 @@ function baseCreateRenderer(options: RendererOptions): any {
     }
   }
 
+  // 挂载 element
   const mountElement = (VNode, container, anchor) => {
     const { type, props, shapeFlag } = VNode
     const el = (VNode.el = hostCreateElement(type))
 
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      // 设置文本
       hostSetElementText(el, VNode.children)
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     }
 
+    // 设置 props
     if (props) {
       for (const key in props) {
         hostPatchProp(el, key, null, props[key])
       }
     }
 
+    // 插入
     hostInsert(el, container, anchor)
   }
 
+  // 更新 element
   const patchElement = (oldVNode, newVNode) => {
     const el = (newVNode.el = oldVNode.el)
 
@@ -74,6 +79,7 @@ function baseCreateRenderer(options: RendererOptions): any {
     patchProps(el, newVNode, oldProps, newProps)
   }
 
+  // 比较子节点
   const patchChildren = (oldVNode, newVNode, container, anchor) => {
     const c1 = oldVNode?.children
     const prevShapeFlag = oldVNode ? oldVNode.shapeFlag : 0
@@ -109,6 +115,7 @@ function baseCreateRenderer(options: RendererOptions): any {
     }
   }
 
+  // 比较 props
   const patchProps = (el: Element, VNode, oldProps, newPops) => {
     if (oldProps !== newPops) {
       for (const key in newPops) {
