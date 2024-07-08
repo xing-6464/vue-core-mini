@@ -1,7 +1,10 @@
 import { ShapeFlags } from 'packages/shared/src/shapeFlags'
 import { Fragment, Text, Comment, isSomeVNodeType } from './vnode'
 import { EMPTY_OBJ, isString } from '@vue/shared'
-import { normalizeVNode } from './componentRenderUtils'
+import { normalizeVNode, renderComponentRoot } from './componentRenderUtils'
+import { createComponentInstance, setupComponent } from './component'
+import { effect, ReactiveEffect } from 'packages/reactivity/src/effect'
+import { queuePreFlushCb } from './scheduler'
 
 export interface RendererOptions {
   /**
@@ -42,6 +45,12 @@ function baseCreateRenderer(options: RendererOptions): any {
     createComment: hostCreateComment
   } = options
 
+  const processComponent = (oldVNode, newVNode, container, anchor) => {
+    if (oldVNode == null) {
+      mountComponent(newVNode, container, anchor)
+    }
+  }
+
   const processFragment = (oldVNode, newVNode, container, anchor) => {
     if (oldVNode == null) {
       mountChildren(newVNode.children, container, anchor)
@@ -79,6 +88,37 @@ function baseCreateRenderer(options: RendererOptions): any {
       // 更新
       patchElement(oldVNode, newVNode)
     }
+  }
+
+  const mountComponent = (initialVNode, container, anchor) => {
+    initialVNode.component = createComponentInstance(initialVNode)
+    const instance = initialVNode.component
+
+    setupComponent(instance)
+
+    setupRenderEffect(instance, initialVNode, container, anchor)
+  }
+
+  const setupRenderEffect = (instance, initialVNode, container, anchor) => {
+    const componentUpdateFn = () => {
+      if (!instance.isMounted) {
+        const subTree = (instance.subTree = renderComponentRoot(instance))
+
+        patch(null, subTree, container, anchor)
+
+        initialVNode.el = subTree.el
+      } else {
+      }
+    }
+
+    const effect = (instance.effect = new ReactiveEffect(
+      componentUpdateFn,
+      () => queuePreFlushCb(update)
+    ))
+
+    const update = (instance.update = () => effect.run())
+
+    update()
   }
 
   const mountChildren = (children, container, anchor) => {
@@ -207,6 +247,7 @@ function baseCreateRenderer(options: RendererOptions): any {
         if (shapeFlag & ShapeFlags.ELEMENT) {
           processElement(oldVNode, newVNode, container, anchor)
         } else if (shapeFlag & ShapeFlags.COMPONENT) {
+          processComponent(oldVNode, newVNode, container, anchor)
         }
     }
   }
