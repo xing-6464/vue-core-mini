@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script>
+      const { h, render } = Vue
+
+      const component = {
+        data() {
+          return {
+            msg: 'hello component'
+          }
+        },
+        render() {
+          return h('h1', this.msg)
+        },
+        created() {
+          console.log('created', this.msg)
+          setTimeout(() => {
+            this.msg = '你好，世界！'
+          }, 2000)
+        }
+      }
+      const vnode = h(component)
+      render(vnode, document.getElementById('app'))
+    </script>
+  </body>
+</html>
