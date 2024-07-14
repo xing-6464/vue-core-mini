@@ -243,6 +243,19 @@ function baseCreateRenderer(options: RendererOptions): any {
       }
       i++
     }
+
+    // 2.自后向前对比
+    while (i <= oldChildrenEnd && i <= newChildrenEnd) {
+      const oldVNode = oldChildren[oldChildrenEnd]
+      const newVNode = newChildren[newChildrenEnd]
+      if (isSomeVNodeType(oldVNode, newVNode)) {
+        patch(oldVNode, newVNode, container, null)
+      } else {
+        break
+      }
+      oldChildrenEnd--
+      newChildrenEnd--
+    }
   }
 
   // 比较 props
