@@ -269,6 +269,13 @@ function baseCreateRenderer(options: RendererOptions): any {
         }
       }
     }
+    // 4.旧节点多余新节点
+    else if (i > newChildrenEnd) {
+      while (i <= oldChildrenEnd) {
+        unmount(oldChildren[i])
+        i++
+      }
+    }
   }
 
   // 比较 props
